@@ -19,13 +19,14 @@ class Driver {
     BusinessCardParser parser = new BusinessCardParser();
     ContactInfo info;
     int numTests = tests.length;
+    
     for(int i = 0; i < numTests; i++){
       try{
         info = parser.getContactInfo(tests[i]);
         System.out.println("Test Number: "+i+"\nName: "+info.getName()+"\nPhone Number: "+info.getPhoneNumber()+"\nEmail Address: "+info.getEmailAddress());
-        } catch (IllegalArgumentException e){
+      } catch (IllegalArgumentException e){
           System.err.println("Caught exception: "+e.getMessage());
-          }
+      }
     }
   }
 }
