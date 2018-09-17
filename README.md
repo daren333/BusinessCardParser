@@ -6,11 +6,11 @@ This code uses Regular expressions to parse a block of text obtained from a busi
 Telephone numbers are parsed using a regular expression that searches for 10 consecutive digits, possibly grouped in 3 digit, 3 digit, 4 digit blocks, with the first block possibly preceded by a 1 (for a total of 11 digits), and possibly enclosed by parenthesis. In addition, all blocks (including between the preceding 1 and the first block of 3 digits) can be separated by one or zero spaces, one or zero dashes, or one of each. As currently constructed, the function will not consider non U.S. numbers or any telephone numbers that include extensions. If needed, this functionality can be added by adding to the front and/or back of the regular expression as desired. The following patterns will be recognized, all of which can be preceded by a 1, a 1 followed by a dash, or a 1 followed by a space, and all of which can have zero or more spaces separating each block:
 
 					xxxyyyzzzz		(xxx)yyyzzz
-					xxxyyy-zzzz		(xxx)yyy-zzzz													xxx-yyyzzzz		(xxx)-yyyzzzz
-					xxx-yyy-zzzz		(xxx)-yyy-zzzz			
+					xxxyyy-zzzz		(xxx)yyy-zzzz
+					xxx-yyyzzzz		(xxx)-yyyzzzz
+					xxx-yyy-zzzz		(xxx)-yyy-zzzz
 					xxx yyy zzzz		(xxx) yyy zzzz
 					
-
 # Email:
 Email addresses are parsed using a regular expression that searches for the following pattern:
 
