@@ -5,17 +5,16 @@ This code uses Regular expressions to parse a block of text obtained from a busi
 # Phone:
 Telephone numbers are parsed using a regular expression that searches for 10 consecutive digits, possibly grouped in 3 digit, 3 digit, 4 digit blocks, with the first block possibly preceded by a 1 (for a total of 11 digits), and possibly enclosed by parenthesis. In addition, all blocks (including between the preceding 1 and the first block of 3 digits) can be separated by one or zero spaces, one or zero dashes, or one of each. As currently constructed, the function will not consider non U.S. numbers or any telephone numbers that include extensions. If needed, this functionality can be added by adding to the front and/or back of the regular expression as desired. The following patterns will be recognized, all of which can be preceded by a 1, a 1 followed by a dash, or a 1 followed by a space, and all of which can have zero or more spaces separating each block:
 
-												xxxyyyzzzz			(xxx)yyyzzzz
-												xxxyyy-zzzz			(xxx)yyy-zzzz
-												xxx-yyyzzzz			(xxx)-yyyzzzz
-												xxx-yyy-zzzz		(xxx)-yyy-zzzz			
-												xxx yyy zzzz		(xxx) yyy zzzz
+					xxxyyyzzzz		(xxx)yyyzzz
+					xxxyyy-zzzz		(xxx)yyy-zzzz													xxx-yyyzzzz		(xxx)-yyyzzzz
+					xxx-yyy-zzzz		(xxx)-yyy-zzzz			
+					xxx yyy zzzz		(xxx) yyy zzzz
 					
 
 # Email:
 Email addresses are parsed using a regular expression that searches for the following pattern:
 
-																a@b.c
+							a@b.c
 
 where a, b, and c represent strings of indeterminate length composed of any non-space characters. In addition to the full email address being stored, the function also stores the user name of the email address (the part preceding the @) as a global variable in order to determine the name of the person (explained further below). Using a similar tactic, one could potentially store the domain of the email address if they wanted to determine the company name. However, as currently constructed, this code lacks that functionality.
 
