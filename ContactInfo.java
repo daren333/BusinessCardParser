@@ -3,15 +3,12 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 class ContactInfo {
-	
   String name, phoneNumber, email;
   
-  protected ContactInfo(String name, String phoneNumber, String email){
-    
+  ContactInfo(String name, String phoneNumber, String email){
     this.name = name;
     this.phoneNumber = phoneNumber;
     this.email = email;
-     
   }
   
   //returns the full name of the individual (eg. John Smith, Susan Malick)
