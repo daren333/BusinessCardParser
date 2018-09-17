@@ -34,7 +34,8 @@ class BusinessCardParser {
 	one non-space character, a period, and at least one more non-space character are considered 
 	possible email addresses.*/
 
-	private void groupLinesByType(String[] lines, ArrayList<String> possibleNameData, ArrayList<String> possiblePhoneData, ArrayList<String> possibleEmailData){
+	private void groupLinesByType(String[] lines, ArrayList<String> possibleNameData, ArrayList<String> possiblePhoneData, 
+				      ArrayList<String> possibleEmailData){
 		Pattern namePattern = Pattern.compile("^[^\\d\\!\\@\\#\\$\\%\\&\\+]*$");
 		Pattern phonePattern = Pattern.compile("(1?\\s*\\-?\\s*\\(?\\s*\\d{3}\\s*\\-?\\s*\\)?\\s*\\-?\\d{3}\\s*\\-?\\s*\\d{4})");
 		Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");
