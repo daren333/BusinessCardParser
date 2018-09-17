@@ -37,7 +37,7 @@ class BusinessCardParser {
   private void groupLinesByType(String[] lines, ArrayList<String> possibleNameData, ArrayList<String> possiblePhoneData, ArrayList<String> possibleEmailData){
     Pattern namePattern = Pattern.compile("^[^\\d\\!\\@\\#\\$\\%\\&\\+]*$");
   	Pattern phonePattern = Pattern.compile("(1?\\s*\\-?\\s*\\(?\\s*\\d{3}\\s*\\-?\\s*\\)?\\s*\\-?\\d{3}\\s*\\-?\\s*\\d{4})");
-  	Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");]
+  	Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");
 		int len = lines.length;
 
     for(int i = 0; i < len; i++){
@@ -93,20 +93,23 @@ class BusinessCardParser {
     to feel left out*/
 	
   private String parseEmailAddress(ArrayList<String> possibleEmailData){
+		Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");
+    Matcher matcher = emailPattern.matcher(possibleEmailData.get(0));
+		String emailAddress = null;
+		
 		//Throws exception unless there is exactly one possible email address to avoid unknown behavior
     if(possibleEmailData.size() > 1 || possibleEmailData.size() < 1){
       throw new IllegalArgumentException("Multiple email addresses provided or unable to determine email");
     }
 		
-		Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");
-    Matcher matcher = emailPattern.matcher(possibleEmailData.get(0));
     if(matcher.find()){
-      String emailAddress = matcher.group(1);
+      emailAddress = matcher.group(1);
 			/*Global variable userName assigned the portion of the email address
 			preceding the @ sign for later use in parsing name data*/
       this.userName = matcher.group(2);
-      return emailAddress;
-    }
+		}
+    
+		return emailAddress;
   }
 
 	/*This function uses a Suffix Tree to iterate through each line possibly containing a name and
@@ -116,7 +119,7 @@ class BusinessCardParser {
 	MAY OCCUR if any of the lines happen to match three or more consecutive letters of the username.*/
 	
   private String parseName(ArrayList<String> possibleNameData){
-    String longestMatch;
+    String longestMatch = null;
     int userNameLen = userName.length(), maxMatches = 0;
     
     for(String line: possibleNameData){
@@ -124,7 +127,7 @@ class BusinessCardParser {
       int[][] matchCounter = new int[lineLen][userNameLen];
       for(int i = 0; i < (lineLen - 1); i++){
         for(int k = 0; k < (userNameLen - 1); k++){
-          if(line.charAt(i) == targetWord.charAt(k)){
+          if(line.charAt(i) == userName.charAt(k)){
             if(i == 0 || k == 0){
               matchCounter[i][k] = 1;
             }
@@ -142,11 +145,13 @@ class BusinessCardParser {
         }
       }
     }
+		
     /*if fewer than three letters have matched, throw an exception rather 
     than guessing at the correct line*/
     if(maxMatches < 3){
       throw new IllegalArgumentException("Unable to determine name");
     }
+		
     return longestMatch;
   }
  }
