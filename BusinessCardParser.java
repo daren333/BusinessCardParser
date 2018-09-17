@@ -6,20 +6,22 @@ import java.lang.StringBuilder;
 
 class BusinessCardParser {
 
-  String local;
+  String userName;
   
   ContactInfo getContactInfo(String document){
-	String emailAddress, phoneNumber, name;
-	ArrayList<String> possibleNameData = new ArrayList<String>();
-    ArrayList<String> possiblePhoneData = new ArrayList<String>();
+		String emailAddress, phoneNumber, name;
+		ArrayList<String> possibleNameData = new ArrayList<String>();
+  	ArrayList<String> possiblePhoneData = new ArrayList<String>();
     ArrayList<String> possibleEmailData = new ArrayList<String>();
 	
-	//splitting document by newline; considering \r, \n, and \r\n to avoid issues with different systems
+		//splitting document by newline; considering \r, \n, and \r\n to avoid issues with different systems
     String[] docByLine = document.split("\r?\n|\r");
     groupLinesByType(docByLine, possibleNameData, possiblePhoneData, possibleEmailData);
+	  
     phoneNumber = parsePhoneNumber(possiblePhoneData);
     emailAddress = parseEmailAddress(possibleEmailData);
     name = parseName(possibleNameData);
+	  
     return new ContactInfo(name, phoneNumber, emailAddress);
   }
   
@@ -33,40 +35,34 @@ class BusinessCardParser {
   possible email addresses.*/
   
   private void groupLinesByType(String[] lines, ArrayList<String> possibleNameData, ArrayList<String> possiblePhoneData, ArrayList<String> possibleEmailData){
-    int len = lines.length;
     Pattern namePattern = Pattern.compile("^[^\\d\\!\\@\\#\\$\\%\\&\\+]*$");
-  	Pattern phonePattern = Pattern.compile("(1?\\-?\\s*\\(?\\d{3}\\-?\\s*\\)?\\s*\\d{3}\\-?\\s*\\d{4})");
-  	Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");
-    
-    
+  	Pattern phonePattern = Pattern.compile("(1?\\s*\\-?\\s*\\(?\\s*\\d{3}\\s*\\-?\\s*\\)?\\s*\\-?\\d{3}\\s*\\-?\\s*\\d{4})");
+  	Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");]
+		int len = lines.length;
+
     for(int i = 0; i < len; i++){
-    	String line = lines[i];
-      	
-      	Matcher matcher = namePattern.matcher(line);
-        if(matcher.find()){
-          //System.out.println(line);
-          possibleNameData.add(line);
-        }
-      	matcher = phonePattern.matcher(line);
-      	if(matcher.find()){
-          //System.out.println(line);
-          possiblePhoneData.add(line);
-        }
-      	matcher = emailPattern.matcher(line);
-      	if(matcher.find()){
-           //System.out.println(line);
-           possibleEmailData.add(line);
-        }   
+    	String line = lines[i];	
+      Matcher matcher = namePattern.matcher(line);
+      if(matcher.find()){
+      	possibleNameData.add(line);
+      }
+     	matcher = phonePattern.matcher(line);
+      if(matcher.find()){
+      	possiblePhoneData.add(line);
+      }
+      matcher = emailPattern.matcher(line);
+     	if(matcher.find()){
+      	possibleEmailData.add(line);
+      }   
     }
-    return;
   }
   
   private String parsePhoneNumber(ArrayList<String> possiblePhoneData){
     StringBuilder phoneNumber = new StringBuilder();
     
-    //check for fax numbers
+    /*check for fax numbers, create shadow to avoid removing items while iterating 
+		through list and then remove any lines containing "F", "f", "Fax", or "fax" */
     Pattern faxNumbers = Pattern.compile("[F|f]+(ax)?:?\\s*");
-   	//create shadow to avoid removing items while iterating through list
     ArrayList<String> shadow = new ArrayList<String>(possiblePhoneData);
     for(String line : shadow){
       Matcher matcher = faxNumbers.matcher(line);
@@ -74,11 +70,15 @@ class BusinessCardParser {
         possiblePhoneData.remove(line);
       }
     }
+		
+		//Throws exception unless there is exactly one possible phone number remaining to avoid unknown behavior
     if(possiblePhoneData.size() > 1 || possiblePhoneData.size() < 1){
       throw new IllegalArgumentException("Multiple phone numbers provided or ambiguous phone number input");
     }
+		
     String line = possiblePhoneData.get(0);
    	int len = line.length();
+		//Uses ascii value range to copy only digits
    	for(int i = 0; i < len; i++) {
       if(line.charAt(i) > 47 && line.charAt(i) < 58){
         phoneNumber.append(line.charAt(i));
@@ -87,57 +87,64 @@ class BusinessCardParser {
     return phoneNumber.toString();
   }
   
-  /*This function is somewhat superfluous as email parsing could be accomplished in the
+  /*The parse email function is somewhat superfluous as email parsing could be accomplished in the
   	groupLinesByType function. However, I've included it here in the event that further scrutiny
     is wanted in the future and because everyone else got their own function so I didn't want emails
     to feel left out*/
+	
   private String parseEmailAddress(ArrayList<String> possibleEmailData){
-  	Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");
-    
+		//Throws exception unless there is exactly one possible email address to avoid unknown behavior
     if(possibleEmailData.size() > 1 || possibleEmailData.size() < 1){
-      throw new IllegalArgumentException("Multiple email addresses provided or ambiguous email input");
+      throw new IllegalArgumentException("Multiple email addresses provided or unable to determine email");
     }
+		
+		Pattern emailPattern = Pattern.compile("((\\S+)@(\\S+).\\S+)");
     Matcher matcher = emailPattern.matcher(possibleEmailData.get(0));
     if(matcher.find()){
       String emailAddress = matcher.group(1);
-      local = matcher.group(2);
+			/*Global variable userName assigned the portion of the email address
+			preceding the @ sign for later use in parsing name data*/
+      this.userName = matcher.group(2);
       return emailAddress;
-    }
-    else{
-      throw new IllegalArgumentException("Unable to determine email address");
     }
   }
 
+	/*This function uses a Suffix Tree to iterate through each line possibly containing a name and
+	matching each character with the email userName to find the longest matching substring. This assumes
+	that company email addresses generally use a portion of the employees name as part of their email
+	username. In the event that the username has nothing to do with the subject's name, UNKNOWN BEHAVIOR 
+	MAY OCCUR if any of the lines happen to match three or more consecutive letters of the username.*/
+	
   private String parseName(ArrayList<String> possibleNameData){
-    String targetWord = this.local, longestMatch = null;
-    int maxMatches = 0, targetLen = targetWord.length();
+    String longestMatch;
+    int userNameLen = userName.length(), maxMatches = 0;
     
     for(String line: possibleNameData){
       int lineLen = line.length();
-      int[][] matchCounter = new int[lineLen][targetLen];
+      int[][] matchCounter = new int[lineLen][userNameLen];
       for(int i = 0; i < (lineLen - 1); i++){
-        for(int j = 0; j < (targetLen - 1); j++){
-          if(line.charAt(i) == targetWord.charAt(j)){
-            if(i == 0 || j == 0){
-              matchCounter[i][j] = 1;
+        for(int k = 0; k < (userNameLen - 1); k++){
+          if(line.charAt(i) == targetWord.charAt(k)){
+            if(i == 0 || k == 0){
+              matchCounter[i][k] = 1;
             }
             else{
-               matchCounter[i][j] = matchCounter[i-1][j-1]+1;
+               matchCounter[i][k] = matchCounter[i-1][k-1]+1;
             }
-            if(matchCounter[i][j] > maxMatches){
-              maxMatches = matchCounter[i][j];
+            if(matchCounter[i][k] > maxMatches){
+              maxMatches = matchCounter[i][k];
               longestMatch = line;
             }
           }
           else{
-            matchCounter[i][j] = 0;
+            matchCounter[i][k] = 0;
           }
         }
       }
     }
-    /*if nothing has matched or only one letter has matched, throw an exception rather 
+    /*if fewer than three letters have matched, throw an exception rather 
     than guessing at the correct line*/
-    if(maxMatches < 2){
+    if(maxMatches < 3){
       throw new IllegalArgumentException("Unable to determine name");
     }
     return longestMatch;
