@@ -5,11 +5,11 @@ This code uses Regular expressions to parse a block of text obtained from a busi
 # Phone:
 Telephone numbers are parsed using a regular expression that searches for 10 consecutive digits, possibly grouped in 3 digit, 3 digit, 4 digit blocks, with the first block possibly preceded by a 1 (for a total of 11 digits), and possibly enclosed by parenthesis. In addition, all blocks (including between the preceding 1 and the first block of 3 digits) can be separated by one or zero spaces, one or zero dashes, or one of each. As currently constructed, the function will not consider non U.S. numbers or any telephone numbers that include extensions. If needed, this functionality can be added by adding to the front and/or back of the regular expression as desired. The following patterns will be recognized, all of which can be preceded by a 1, a 1 followed by a dash, or a 1 followed by a space:
 
-                                                  xxxyyyzzzz			  (xxx)yyyzzzz			
-                                                  xxx-yyy-zzzz			(xxx)-yyy-zzzz			
-                                                  xxx yyy zzzz			(xxx) yyy zzzz
-                                                  xxx-yyy zzzz			(xxx)-yyy zzzz
-                                                  xxx yyy-zzzz			(xxx) yyy-zzzz
+xxxyyyzzzz			(xxx)yyyzzzz			
+xxx-yyy-zzzz			(xxx)-yyy-zzzz			
+xxx yyy zzzz			(xxx) yyy zzzz
+xxx-yyy zzzz			(xxx)-yyy zzzz
+xxx yyy-zzzz			(xxx) yyy-zzzz
 
 # Email:
 Email addresses are parsed using a regular expression that searches for the following pattern:
@@ -25,6 +25,6 @@ This function must be called after the email parsing function as this relies on 
 This function assumes that the local name of the person’s email address has some relation to their first or last name. The functionality will fail if provided an email address containing a local name unrelated to the person’s actual name, or a local name containing only initials. If faced with a scenario in which the longest common substring only contains zero or one matches, the function will throw an exception rather than take a guess at the correct name.
 If the email address is of the aforementioned unsupported type, one possible solution could be to use each line as the input to a Google search and then check the first link for a company web page (company name), a link to glassdoor.com (job title), or a facebook/linkedin profile (name!). At any rate, this is not supported in the current version. 
 
-                                                                   Testing:
+# Testing:
  A testing file 
 		
